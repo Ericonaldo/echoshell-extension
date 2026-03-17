@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoShell</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <h1 class="popup-title">EchoShell</h1>
+      <a href="#" id="settings-link" class="settings-icon" title="Settings">⚙</a>
+    </header>
+
+    <div class="mode-selector">
+      <label class="mode-label">
+        <input type="radio" name="mode" value="audio" id="mode-audio">
+        <span>🎙 Audio</span>
+      </label>
+      <label class="mode-label">
+        <input type="radio" name="mode" value="ocr" id="mode-ocr">
+        <span>👁 Screen</span>
+      </label>
+      <label class="mode-label">
+        <input type="radio" name="mode" value="both" id="mode-both">
+        <span>⚡ Both</span>
+      </label>
+    </div>
+
+    <div class="status-area">
+      <div id="status-indicator" class="status-dot inactive"></div>
+      <span id="status-text">Inactive</span>
+    </div>
+
+    <div class="action-buttons">
+      <button id="start-btn" class="btn btn-primary">▶ Start</button>
+      <button id="stop-btn" class="btn btn-secondary" disabled>⏹ Stop</button>
+    </div>
+
+    <div class="side-panel-btn">
+      <button id="open-panel-btn" class="btn btn-ghost">Open Side Panel</button>
+    </div>
+
+    <div id="error-msg" class="error-message" style="display:none;"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "presets": [
+    ["@babel/preset-env", {
+      "targets": {
+        "chrome": "120"
+      },
+      "modules": "commonjs"
+    }]
+  ]
+}

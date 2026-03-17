@@ -1,0 +1,59 @@
+{
+  "project": "echoshell-extension",
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Project scaffolding and configuration",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    },
+    {
+      "id": "task-002",
+      "title": "Utility modules (storage, audio-utils, frame-diff, asr-client, ocr-client, llm-client, export)",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    },
+    {
+      "id": "task-003",
+      "title": "Background service worker (message routing, offscreen management)",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    },
+    {
+      "id": "task-004",
+      "title": "Offscreen document (audio capture, VAD, ASR pipeline)",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    },
+    {
+      "id": "task-005",
+      "title": "Content script (floating subtitle overlay)",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    },
+    {
+      "id": "task-006",
+      "title": "Side panel UI (transcript display, history, export)",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    },
+    {
+      "id": "task-007",
+      "title": "Settings page (BYOK configuration)",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    },
+    {
+      "id": "task-008",
+      "title": "Popup (capture start/stop controls)",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    },
+    {
+      "id": "task-009",
+      "title": "Test suite (139 unit tests, all passing)",
+      "status": "completed",
+      "completedAt": "2026-03-17"
+    }
+  ]
+}

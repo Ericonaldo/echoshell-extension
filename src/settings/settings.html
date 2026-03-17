@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoShell Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <header class="settings-header">
+      <h1>EchoShell Settings</h1>
+      <p class="subtitle">Configure your API keys and preferences</p>
+    </header>
+
+    <form id="settings-form">
+      <!-- ASR Settings -->
+      <section class="settings-section">
+        <h2>🎙 Audio Transcription (ASR)</h2>
+        <div class="form-group">
+          <label>Provider</label>
+          <select id="asr-provider" name="asr.provider">
+            <option value="openai">OpenAI Whisper</option>
+            <option value="deepgram">Deepgram</option>
+            <option value="groq">Groq</option>
+            <option value="custom">Custom Endpoint</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>API Key</label>
+          <div class="input-with-toggle">
+            <input type="password" id="asr-api-key" name="asr.apiKey" placeholder="sk-..." autocomplete="off">
+            <button type="button" class="toggle-visibility" data-target="asr-api-key">👁</button>
+          </div>
+        </div>
+        <div class="form-group" id="asr-endpoint-group">
+          <label>Endpoint URL</label>
+          <input type="url" id="asr-endpoint" name="asr.endpoint"
+            placeholder="https://api.openai.com/v1/audio/transcriptions">
+        </div>
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="asr-model" name="asr.model" placeholder="whisper-1">
+        </div>
+        <div class="form-group">
+          <label>Language (leave empty for auto)</label>
+          <input type="text" id="asr-language" name="asr.language" placeholder="en, zh, auto...">
+        </div>
+      </section>
+
+      <!-- OCR Settings -->
+      <section class="settings-section">
+        <h2>👁 Screen OCR</h2>
+        <div class="form-group">
+          <label>Provider</label>
+          <select id="ocr-provider" name="ocr.provider">
+            <option value="openai">OpenAI Vision</option>
+            <option value="tesseract">Tesseract.js (Offline)</option>
+          </select>
+        </div>
+        <div class="form-group" id="ocr-api-key-group">
+          <label>API Key</label>
+          <div class="input-with-toggle">
+            <input type="password" id="ocr-api-key" name="ocr.apiKey" placeholder="sk-..." autocomplete="off">
+            <button type="button" class="toggle-visibility" data-target="ocr-api-key">👁</button>
+          </div>
+        </div>
+        <div class="form-group" id="ocr-endpoint-group">
+          <label>Endpoint URL</label>
+          <input type="url" id="ocr-endpoint" name="ocr.endpoint"
+            placeholder="https://api.openai.com/v1/chat/completions">
+        </div>
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="ocr-model" name="ocr.model" placeholder="gpt-4o-mini">
+        </div>
+      </section>
+
+      <!-- LLM Settings -->
+      <section class="settings-section">
+        <h2>✨ Text Polish (LLM)</h2>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="llm-enabled" name="llm.enabled">
+            Enable LLM text polish
+          </label>
+        </div>
+        <div id="llm-fields">
+          <div class="form-group">
+            <label>Provider</label>
+            <select id="llm-provider" name="llm.provider">
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+              <option value="custom">Custom Endpoint</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>API Key</label>
+            <div class="input-with-toggle">
+              <input type="password" id="llm-api-key" name="llm.apiKey" placeholder="sk-..." autocomplete="off">
+              <button type="button" class="toggle-visibility" data-target="llm-api-key">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Model</label>
+            <input type="text" id="llm-model" name="llm.model" placeholder="gpt-4o-mini">
+          </div>
+        </div>
+      </section>
+
+      <!-- UI Settings -->
+      <section class="settings-section">
+        <h2>🎨 Display</h2>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="floating-subtitles" name="ui.floatingSubtitles">
+            Show floating subtitles on video
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Font Size</label>
+          <input type="range" id="font-size" name="ui.fontSize" min="12" max="32" step="1">
+          <span id="font-size-display">16px</span>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+        <div id="save-status" class="save-status"></div>
+      </div>
+    </form>
+  </div>
+  <script src="settings.js"></script>
+</body>
+</html>
