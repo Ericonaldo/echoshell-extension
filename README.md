@@ -44,13 +44,17 @@
 
 ---
 
-## Quick Start
+## Quick Start (Free Setup)
+
+The fastest way to get started at zero cost:
 
 1. **Install** the extension (see [Installation](#installation))
-2. Open **Settings** (⚙) and enter your OpenAI API key under ASR
-3. Navigate to any podcast/video page (YouTube, Spotify, etc.)
-4. Click the EchoShell icon → select **🎙 Audio** mode → click **▶ Start**
-5. Your transcript appears live in the **Side Panel**
+2. Get a free [Groq API key](https://console.groq.com) — takes 30 seconds
+3. Open **Settings** (⚙) → ASR → set Provider to **Groq**, paste your key, set model to `whisper-large-v3-turbo`
+4. For OCR, set Provider to **Tesseract.js** — no key needed, works offline
+5. Navigate to any podcast/video page (YouTube, Spotify, etc.)
+6. Click the EchoShell icon → select **🎙 Audio** mode → click **▶ Start**
+7. Your transcript appears live in the **Side Panel**
 
 ---
 
@@ -85,39 +89,46 @@ Open Settings via the ⚙ icon in the popup or side panel. All keys are stored l
 
 ### ASR Providers
 
-| Provider | Model | Notes |
-|---|---|---|
-| **OpenAI** | `whisper-1` | Best accuracy, requires API key |
-| **Deepgram** | `nova-2` | Fast, great for live streaming |
-| **Groq** | `whisper-large-v3` | Fastest inference, free tier available |
-| **Custom** | Any | OpenAI-compatible endpoint |
+| Provider | Model | Cost | Notes |
+|---|---|---|---|
+| **Groq** | `whisper-large-v3-turbo` | **Free tier** ⭐ | Fastest inference, generous free quota — recommended |
+| **OpenAI** | `whisper-1` | $0.006/min | Best accuracy |
+| **Deepgram** | `nova-2` | $200 free credit | Great for live streaming |
+| **Custom** | Any | Varies | Any OpenAI-compatible endpoint |
+
+> **Recommended**: Groq — get a free key at [console.groq.com](https://console.groq.com). Use model `whisper-large-v3-turbo` for the best speed/accuracy balance.
 
 **Fields:**
 - **API Key** — your provider's secret key
 - **Endpoint URL** — leave blank for default, or enter a custom proxy
-- **Model** — model name (e.g. `whisper-1`)
+- **Model** — model name (e.g. `whisper-large-v3-turbo`)
 - **Language** — ISO code (`en`, `zh`, `ja`…) or leave blank for auto-detect
 
 ### OCR Providers
 
-| Provider | Notes |
-|---|---|
-| **OpenAI Vision** | `gpt-4o-mini` — handles stylized/degraded fonts well |
-| **Tesseract.js** | Fully offline, no API key needed |
+| Provider | Cost | Notes |
+|---|---|---|
+| **Tesseract.js** | **Free, offline** ⭐ | No API key needed, works without internet — recommended |
+| **OpenAI Vision** | $0.15/1M tokens | `gpt-4o-mini` — better with stylized/degraded fonts |
 
-OCR uses frame-diff to detect subtitle changes — only triggers an API call when the subtitle region changes significantly, saving quota.
+> **Recommended**: Tesseract.js — zero cost, no key required, fully private.
+
+OCR uses frame-diff to detect subtitle changes — only triggers processing when the subtitle region changes significantly, saving quota.
 
 ### LLM Polish
 
 Optional cleanup pass on raw ASR/OCR output (fix punctuation, remove filler words):
 
-| Provider | Model |
-|---|---|
-| **OpenAI** | `gpt-4o-mini` (default) |
-| **Anthropic** | `claude-3-5-haiku-20241022` |
-| **Custom** | Any OpenAI-compatible endpoint |
+| Provider | Model | Cost | Notes |
+|---|---|---|---|
+| **Groq** | `llama-3.1-8b-instant` | **Free tier** ⭐ | Fast, good quality for cleanup |
+| **OpenAI** | `gpt-4o-mini` | $0.15/1M tokens | Reliable, cheap |
+| **Anthropic** | `claude-haiku-4-5` | $0.80/1M tokens | Best quality/price ratio |
+| **Custom** | Any | Varies | Any OpenAI-compatible endpoint |
 
-Enable the **"Enable LLM text polish"** checkbox to activate.
+> **Recommended**: Disable if not needed, or use Groq with `llama-3.1-8b-instant` for free cleanup.
+
+Enable the **"Enable LLM text polish"** toggle to activate.
 
 ---
 
