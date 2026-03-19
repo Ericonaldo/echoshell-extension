@@ -1,4 +1,4 @@
-import { MSG, STORAGE_KEYS } from '../utils/constants.js';
+import { MSG, STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants.js';
 import { getSettings, saveSession, generateId } from '../utils/storage.js';
 
 // Track if capture is in progress (using storage.session for persistence across SW restarts)
@@ -148,7 +148,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.text) {
         broadcastToContentScripts({
           type: MSG.SHOW_SUBTITLE,
-          text: message.text
+          text: message.text,
+          source: message.source || 'asr'
         });
       }
       sendResponse({ received: true });
@@ -160,7 +161,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.text) {
         broadcastToContentScripts({
           type: MSG.SHOW_SUBTITLE,
-          text: message.text
+          text: message.text,
+          source: 'ocr'
         });
       }
       sendResponse({ received: true });
@@ -194,7 +196,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  */
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
-    const { DEFAULT_SETTINGS } = await import('../utils/constants.js');
     await chrome.storage.local.set({ [STORAGE_KEYS.SETTINGS]: DEFAULT_SETTINGS });
   }
 });
