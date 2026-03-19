@@ -6,6 +6,19 @@ let isCapturing = false;
 let timerInterval = null;
 let timerSeconds = 0;
 
+// State for native subtitle detection
+let nativeTrackInfo = null; // { site, method, tracks, segments }
+
+/**
+ * Show a specific view (idle/detecting/native/ai)
+ * @param {string} viewId - e.g. 'view-idle'
+ */
+function showView(viewId) {
+  document.querySelectorAll('.popup-view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(viewId);
+  if (el) el.classList.add('active');
+}
+
 async function init() {
   const settings = await getSettings();
 
@@ -16,37 +29,188 @@ async function init() {
   // Check current capture status
   try {
     const status = await chrome.runtime.sendMessage({ type: MSG.CAPTURE_STATUS });
-    if (status?.captureActive) setCapturingState(true);
+    if (status?.captureActive) {
+      showView('view-ai');
+      setCapturingState(true);
+    }
   } catch (_) {}
 
-  // Mode change
+  // Event: settings button
+  document.getElementById('settings-link').addEventListener('click', () => {
+    chrome.runtime.openOptionsPage();
+  });
+
+  // Event: "Start Transcript" button (idle view)
+  document.getElementById('start-transcript-btn').addEventListener('click', onStartTranscript);
+
+  // Event: open side panel (idle view)
+  document.getElementById('open-panel-idle-btn').addEventListener('click', openSidePanel);
+
+  // Event: "Export to Side Panel" (native view)
+  document.getElementById('export-to-panel-btn').addEventListener('click', onExportToSidePanel);
+
+  // Event: "Use AI instead" link (native view)
+  document.getElementById('use-ai-btn').addEventListener('click', () => {
+    showView('view-ai');
+    document.getElementById('no-native-notice').style.display = 'none';
+  });
+
+  // Event: start capture (AI view)
+  document.getElementById('start-btn').addEventListener('click', startCapture);
+
+  // Event: stop capture (AI view)
+  document.getElementById('stop-btn').addEventListener('click', stopCapture);
+
+  // Event: open side panel (AI view)
+  document.getElementById('open-panel-btn').addEventListener('click', openSidePanel);
+
+  // Event: config settings button
+  document.getElementById('config-settings-btn').addEventListener('click', () => {
+    chrome.runtime.openOptionsPage();
+  });
+
+  // Mode change -> save settings + check config warning
   document.querySelectorAll('input[name="mode"]').forEach(input => {
     input.addEventListener('change', async () => {
       const updatedSettings = await getSettings();
       updatedSettings.captureMode = input.value;
       await setSettings(updatedSettings);
+      await updateConfigWarning(input.value, updatedSettings);
     });
   });
 
-  document.getElementById('start-btn').addEventListener('click', startCapture);
-  document.getElementById('stop-btn').addEventListener('click', stopCapture);
+  // Pre-check config warning for current mode
+  await updateConfigWarning(settings.captureMode, settings);
+}
 
-  document.getElementById('settings-link').addEventListener('click', () => {
-    chrome.runtime.openOptionsPage();
+/**
+ * "Start Transcript" clicked from idle view:
+ * 1. Show detecting view
+ * 2. Send DETECT_NATIVE_SUBTITLES to background SW
+ * 3. If found -> show native view
+ * 4. If not -> show AI view with notice
+ */
+async function onStartTranscript() {
+  showView('view-detecting');
+  clearError();
+
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) {
+      showError('No active tab found');
+      showView('view-idle');
+      return;
+    }
+
+    const response = await chrome.runtime.sendMessage({
+      type: MSG.DETECT_NATIVE_SUBTITLES,
+      tabId: tab.id
+    });
+
+    if (response?.found && response?.tracks?.length > 0) {
+      // Native subtitles found
+      nativeTrackInfo = response;
+      showNativeView(response);
+    } else {
+      // No native subtitles, go to AI view
+      nativeTrackInfo = null;
+      showView('view-ai');
+      document.getElementById('no-native-notice').style.display = 'flex';
+    }
+  } catch (err) {
+    nativeTrackInfo = null;
+    showView('view-ai');
+    document.getElementById('no-native-notice').style.display = 'flex';
+  }
+}
+
+/**
+ * Populate and show the native subtitle view
+ * @param {Object} info - { site, tracks, segments }
+ */
+function showNativeView(info) {
+  const siteNameEl = document.getElementById('native-site-name');
+  if (siteNameEl) siteNameEl.textContent = info.site || 'Native';
+
+  const select = document.getElementById('native-track-select');
+  select.innerHTML = '';
+  const tracks = info.tracks || [];
+  tracks.forEach((track, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    const autoLabel = track.isAuto ? ' (auto)' : '';
+    opt.textContent = `${track.label || track.lang || 'Subtitles'}${autoLabel}`;
+    select.appendChild(opt);
   });
 
-  document.getElementById('open-panel-btn').addEventListener('click', async () => {
+  showView('view-native');
+}
+
+/**
+ * "Export to Side Panel" clicked: load chosen track's segments into side panel
+ */
+async function onExportToSidePanel() {
+  if (!nativeTrackInfo) return;
+
+  const select = document.getElementById('native-track-select');
+  const trackIndex = parseInt(select.value, 10) || 0;
+
+  // If we already have segments from detection (first track), use them
+  // Otherwise, re-fetch with the chosen track index
+  let segments = nativeTrackInfo.segments || [];
+
+  if (trackIndex !== 0 || segments.length === 0) {
+    // Need to re-fetch for a different track
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab) {
+        const response = await chrome.runtime.sendMessage({
+          type: MSG.DETECT_NATIVE_SUBTITLES,
+          tabId: tab.id,
+          trackIndex
+        });
+        segments = response?.segments || [];
+      }
+    } catch (_) {}
+  }
+
+  // Send segments to side panel
+  try {
+    await chrome.runtime.sendMessage({
+      type: MSG.NATIVE_SEGMENTS,
+      segments,
+      site: nativeTrackInfo.site,
+      trackIndex
+    });
+  } catch (_) {}
+
+  // Open side panel
+  await openSidePanel();
+}
+
+async function openSidePanel() {
+  try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab) {
       await chrome.sidePanel.open({ tabId: tab.id });
       window.close();
     }
-  });
+  } catch (err) {
+    showError(err.message);
+  }
 }
 
 async function startCapture() {
-  const errorEl = document.getElementById('error-msg');
-  errorEl.style.display = 'none';
+  clearError();
+
+  // Check config warning before starting
+  const settings = await getSettings();
+  const mode = document.querySelector('input[name="mode"]:checked')?.value || settings.captureMode;
+  const warning = await checkModeConfigured(mode, settings);
+  if (warning) {
+    showError(warning + ' — please configure in Settings');
+    return;
+  }
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -86,6 +250,8 @@ function setCapturingState(capturing) {
   const statusText = document.getElementById('status-text');
   const timerEl = document.getElementById('status-timer');
 
+  if (!startBtn || !stopBtn) return;
+
   startBtn.disabled = capturing;
   stopBtn.disabled = !capturing;
 
@@ -113,12 +279,53 @@ function setCapturingState(capturing) {
   }
 }
 
+/**
+ * Check if the selected mode is properly configured
+ * @param {string} mode - 'audio', 'ocr', or 'both'
+ * @param {Object} settings
+ * @returns {Promise<string|null>} Warning message or null if configured
+ */
+export async function checkModeConfigured(mode, settings) {
+  if (mode === 'audio' || mode === 'both') {
+    if (!settings.asr?.apiKey && settings.asr?.provider !== 'tesseract') {
+      return 'ASR API key not configured';
+    }
+  }
+  if (mode === 'ocr' || mode === 'both') {
+    if (settings.ocr?.provider === 'openai' && !settings.ocr?.apiKey) {
+      return 'OCR API key not configured';
+    }
+  }
+  return null;
+}
+
+/**
+ * Show or hide config warning pill based on current mode
+ */
+async function updateConfigWarning(mode, settings) {
+  const warning = await checkModeConfigured(mode, settings);
+  const warningEl = document.getElementById('config-warning');
+  const warningText = document.getElementById('config-warning-text');
+  if (!warningEl || !warningText) return;
+
+  if (warning) {
+    warningText.textContent = warning;
+    warningEl.style.display = 'flex';
+  } else {
+    warningEl.style.display = 'none';
+  }
+}
+
 function showError(message) {
   const errorEl = document.getElementById('error-msg');
+  if (!errorEl) return;
   errorEl.textContent = message;
   errorEl.style.display = 'block';
-  document.getElementById('status-indicator').className = 'status-pip error';
-  document.getElementById('status-text').textContent = 'Error';
+}
+
+function clearError() {
+  const errorEl = document.getElementById('error-msg');
+  if (errorEl) errorEl.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', init);

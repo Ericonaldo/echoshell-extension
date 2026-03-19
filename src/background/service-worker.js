@@ -1,5 +1,6 @@
 import { MSG, STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants.js';
 import { getSettings, saveSession, generateId } from '../utils/storage.js';
+import { detectInMainWorld, fetchSubtitleContent } from '../utils/native-subtitle-extractor.js';
 
 // Track if capture is in progress (using storage.session for persistence across SW restarts)
 let creatingOffscreen = false;
@@ -126,6 +127,47 @@ async function handleStopCapture() {
 }
 
 /**
+ * Handle DETECT_NATIVE_SUBTITLES message
+ * Uses chrome.scripting.executeScript with MAIN world to detect subtitles,
+ * then fetches subtitle content in the service worker.
+ */
+async function handleDetectNativeSubtitles(request, sender) {
+  try {
+    const tabId = request.tabId;
+    if (!tabId) {
+      return { success: false, error: 'No tabId provided', found: false };
+    }
+
+    // Inject detectInMainWorld function into MAIN world
+    const results = await chrome.scripting.executeScript({
+      target: { tabId },
+      world: 'MAIN',
+      func: detectInMainWorld
+    });
+
+    const trackInfo = results?.[0]?.result;
+    if (!trackInfo) {
+      return { success: true, found: false, site: null, tracks: [] };
+    }
+
+    // Fetch subtitle content (first track by default)
+    const trackIndex = request.trackIndex || 0;
+    const { tracks, segments } = await fetchSubtitleContent(trackInfo, trackIndex);
+
+    return {
+      success: true,
+      found: true,
+      site: trackInfo.site,
+      method: trackInfo.method,
+      tracks,
+      segments
+    };
+  } catch (err) {
+    return { success: false, error: err.message, found: false };
+  }
+}
+
+/**
  * Main message handler
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -183,6 +225,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chrome.storage.session.get(['captureActive', 'sessionId']).then(data => {
         sendResponse(data);
       });
+      return true;
+
+    case MSG.DETECT_NATIVE_SUBTITLES:
+      handleDetectNativeSubtitles(message, sender).then(sendResponse);
       return true;
 
     default:

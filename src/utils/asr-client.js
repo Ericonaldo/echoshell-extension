@@ -125,3 +125,117 @@ async function transcribeDeepgram(audioBlob, { apiKey, endpoint, language }) {
   const data = await response.json();
   return data?.results?.channels?.[0]?.alternatives?.[0]?.transcript || '';
 }
+
+/**
+ * Transcribe audio with Deepgram diarization enabled
+ * Returns {text, segments} where segments have per-speaker information
+ * @param {Blob} audioBlob - Audio data to transcribe
+ * @param {Object} config - ASR configuration (must use Deepgram provider)
+ * @returns {Promise<{text: string, segments: Array<{timestamp: number, endTime: number, text: string, speakerLabel: string, source: string}>}>}
+ */
+export async function transcribeAudioDiarized(audioBlob, config) {
+  const { apiKey, endpoint, language } = config;
+
+  if (!apiKey) {
+    throw new ASRError('API key not configured', ASR_PROVIDERS.DEEPGRAM, null);
+  }
+
+  const url = endpoint || 'https://api.deepgram.com/v1/listen';
+  const params = new URLSearchParams({
+    model: 'nova-2',
+    smart_format: 'true',
+    diarize: 'true'
+  });
+  if (language && language !== 'auto') {
+    params.set('language', language);
+  }
+
+  let response;
+  try {
+    response = await fetch(`${url}?${params}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${apiKey}`,
+        'Content-Type': audioBlob.type || 'audio/webm'
+      },
+      body: audioBlob
+    });
+  } catch (err) {
+    throw new ASRError(`Network error: ${err.message}`, ASR_PROVIDERS.DEEPGRAM, null);
+  }
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    throw new ASRError(
+      `Deepgram API error: ${response.status} ${body}`,
+      ASR_PROVIDERS.DEEPGRAM,
+      response.status
+    );
+  }
+
+  const data = await response.json();
+
+  // Extract plain transcript
+  const text = data?.results?.channels?.[0]?.alternatives?.[0]?.transcript || '';
+
+  // Extract diarized words and build per-speaker segments
+  const words = data?.results?.channels?.[0]?.alternatives?.[0]?.words || [];
+  const segments = buildDiarizedSegments(words);
+
+  return { text, segments };
+}
+
+/**
+ * Build per-speaker segments from Deepgram diarized words array
+ * @param {Array} words - Array of word objects with speaker, start, end fields
+ * @returns {Array<{timestamp: number, endTime: number, text: string, speakerLabel: string, source: string}>}
+ */
+function buildDiarizedSegments(words) {
+  if (!words || words.length === 0) return [];
+
+  const speakerIdToLabel = (id) => {
+    const letter = String.fromCharCode(65 + (id % 26));
+    return `Speaker ${letter}`;
+  };
+
+  const segments = [];
+  let currentSpeaker = null;
+  let currentWords = [];
+  let segmentStart = null;
+  let segmentEnd = null;
+
+  for (const word of words) {
+    const speakerId = word.speaker !== undefined ? word.speaker : null;
+
+    if (speakerId !== currentSpeaker) {
+      if (currentWords.length > 0) {
+        segments.push({
+          timestamp: Math.round(segmentStart * 1000),
+          endTime: Math.round(segmentEnd * 1000),
+          text: currentWords.join(' '),
+          speakerLabel: speakerIdToLabel(currentSpeaker !== null ? currentSpeaker : 0),
+          source: 'asr'
+        });
+      }
+      currentSpeaker = speakerId;
+      currentWords = [word.punctuated_word || word.word || ''];
+      segmentStart = word.start;
+      segmentEnd = word.end;
+    } else {
+      currentWords.push(word.punctuated_word || word.word || '');
+      segmentEnd = word.end;
+    }
+  }
+
+  if (currentWords.length > 0) {
+    segments.push({
+      timestamp: Math.round(segmentStart * 1000),
+      endTime: Math.round(segmentEnd * 1000),
+      text: currentWords.join(' '),
+      speakerLabel: speakerIdToLabel(currentSpeaker !== null ? currentSpeaker : 0),
+      source: 'asr'
+    });
+  }
+
+  return segments;
+}

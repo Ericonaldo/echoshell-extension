@@ -1,10 +1,12 @@
 import { MSG } from '../utils/constants.js';
 import { getHistory, clearHistory } from '../utils/storage.js';
 import { exportSession } from '../utils/export.js';
+import { assignSpeakerLabels } from '../utils/speaker-diarizer.js';
 import './sidepanel.css';
 
 let currentSegments = [];
 let currentSessionTitle = 'Transcript';
+let lastSpeakerLabel = null; // Track last inserted speaker for dividers
 
 function formatTime(ms) {
   const total = Math.floor(ms / 1000);
@@ -21,12 +23,36 @@ function escapeHtml(str) {
   return d.innerHTML;
 }
 
+/**
+ * Append a speaker divider element before segments from a new speaker
+ * @param {string} speakerLabel
+ */
+function appendSpeakerDivider(speakerLabel) {
+  const list = document.getElementById('transcript-list');
+  const div = document.createElement('div');
+  div.className = 'speaker-divider';
+  div.innerHTML = `<span class="speaker-name">${escapeHtml(speakerLabel)}</span>`;
+  list.appendChild(div);
+}
+
 function appendSegment(segment) {
   const list = document.getElementById('transcript-list');
   const empty = list.querySelector('.empty-state');
   if (empty) empty.remove();
 
+  // Insert speaker divider when speaker changes
+  if (segment.speakerLabel && segment.speakerLabel !== lastSpeakerLabel) {
+    appendSpeakerDivider(segment.speakerLabel);
+    lastSpeakerLabel = segment.speakerLabel;
+  }
+
   const isOcr = segment.source === 'ocr';
+  const isNative = segment.source === 'native';
+  let sourceClass = '';
+  let sourceLabel = 'ASR';
+  if (isOcr) { sourceClass = 'source-ocr'; sourceLabel = 'OCR'; }
+  if (isNative) { sourceClass = 'source-native'; sourceLabel = 'Native'; }
+
   const div = document.createElement('div');
   div.className = 'transcript-segment';
   div.innerHTML = `
@@ -37,7 +63,7 @@ function appendSegment(segment) {
         </svg>
         ${formatTime(segment.timestamp)}
       </span>
-      <span class="segment-source ${isOcr ? 'source-ocr' : ''}">${isOcr ? 'OCR' : 'ASR'}</span>
+      <span class="segment-source ${sourceClass}">${escapeHtml(sourceLabel)}</span>
     </div>
     <p class="segment-text">${escapeHtml(segment.text)}</p>
   `;
@@ -50,6 +76,28 @@ function appendSegment(segment) {
   list.appendChild(div);
   list.scrollTop = list.scrollHeight;
   currentSegments.push(segment);
+}
+
+/**
+ * Load all segments at once (for native subtitle batch loading)
+ * Applies speaker labels via assignSpeakerLabels
+ * @param {Array} segments
+ */
+function loadSegmentsBatch(segments) {
+  if (!segments || segments.length === 0) return;
+
+  currentSegments = [];
+  lastSpeakerLabel = null;
+
+  const list = document.getElementById('transcript-list');
+  list.innerHTML = '';
+
+  // Assign speaker labels
+  const labeled = assignSpeakerLabels(segments);
+
+  for (const seg of labeled) {
+    appendSegment(seg);
+  }
 }
 
 async function loadHistory() {
@@ -76,6 +124,7 @@ async function loadHistory() {
 
 function loadHistorySession(session) {
   currentSegments = [];
+  lastSpeakerLabel = null;
   currentSessionTitle = session.title || 'Transcript';
   const list = document.getElementById('transcript-list');
   list.innerHTML = '';
@@ -149,11 +198,19 @@ chrome.runtime.onMessage.addListener((message) => {
       appendSegment({
         timestamp: message.timestamp || Date.now(),
         text: message.text,
-        source: message.source || 'asr'
+        source: message.source || 'asr',
+        speakerLabel: message.speakerLabel || null
       });
       break;
     case MSG.STOP_CAPTURE:
       if (pip) pip.style.display = 'none';
+      break;
+    case MSG.NATIVE_SEGMENTS:
+      // Load native subtitle segments in batch
+      if (pip) pip.style.display = 'none';
+      if (message.segments && message.segments.length > 0) {
+        loadSegmentsBatch(message.segments);
+      }
       break;
   }
 });

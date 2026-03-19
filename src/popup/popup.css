@@ -323,3 +323,222 @@ body::before {
   font-size: 11.5px;
   line-height: 1.45;
 }
+
+/* ── Views ── */
+.popup-view {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popup-view.active {
+  display: flex;
+}
+
+/* ── Idle view ── */
+.idle-hero {
+  padding: 10px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.idle-tagline {
+  font-size: 12px;
+  color: var(--text-1);
+  letter-spacing: 0.05px;
+}
+
+.site-support-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.site-chip {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--accent-light);
+  background: var(--accent-dim);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 20px;
+  padding: 3px 8px;
+  letter-spacing: 0.1px;
+}
+
+/* ── Detecting view ── */
+.detecting-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 0 20px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid rgba(124, 58, 237, 0.2);
+  border-top-color: var(--accent-light);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.detecting-label {
+  font-size: 13px;
+  color: var(--text-1);
+  letter-spacing: -0.1px;
+}
+
+/* ── Native found card ── */
+.native-card {
+  background: var(--bg-1);
+  border: 1.5px solid rgba(34, 197, 94, 0.35);
+  border-radius: var(--radius-md);
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.06);
+}
+
+.native-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.native-check {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+.native-card-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.native-site-name {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--text-0);
+  letter-spacing: -0.2px;
+}
+
+.native-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.native-lang-label {
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 0.1px;
+}
+
+.native-select {
+  width: 100%;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-0);
+  font-size: 12.5px;
+  font-family: inherit;
+  padding: 7px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+}
+
+.native-select:focus {
+  border-color: var(--accent-mid);
+}
+
+.use-ai-link {
+  font-size: 11.5px;
+  color: var(--text-2);
+  border: none;
+  background: none;
+  padding: 4px 0;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.15s;
+}
+
+.use-ai-link:hover {
+  color: var(--accent-light);
+}
+
+/* ── No-native notice ── */
+.no-native-notice {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  border-radius: var(--radius-sm);
+  color: #fbbf24;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.no-native-notice svg {
+  flex-shrink: 0;
+}
+
+/* ── Config warning pill ── */
+.config-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  border-radius: var(--radius-sm);
+  color: #fbbf24;
+  font-size: 11px;
+  line-height: 1.4;
+  flex-wrap: wrap;
+}
+
+.config-warning svg {
+  flex-shrink: 0;
+}
+
+.config-settings-btn {
+  background: none;
+  border: none;
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.config-settings-btn:hover {
+  opacity: 0.75;
+}
+
+/* ── Full-width button ── */
+.btn-full {
+  width: 100%;
+}
