@@ -3,52 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EchoShell - Transcript</title>
-  <link rel="stylesheet" href="sidepanel.css">
+  <title>EchoShell</title>
 </head>
 <body>
-  <div class="panel-container">
+  <div class="panel-root">
+    <!-- Header -->
     <header class="panel-header">
-      <h1 class="panel-title">EchoShell</h1>
+      <div class="header-left">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect width="24" height="24" rx="6" fill="url(#hg)"/>
+          <defs>
+            <linearGradient id="hg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#a78bfa"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </linearGradient>
+          </defs>
+          <rect x="4.5" y="9" width="2.5" height="6" rx="1.25" fill="white" opacity="0.9"/>
+          <rect x="9" y="6.5" width="2.5" height="11" rx="1.25" fill="white"/>
+          <rect x="13.5" y="8" width="2.5" height="8" rx="1.25" fill="white" opacity="0.9"/>
+          <rect x="18" y="10" width="2.5" height="4" rx="1.25" fill="white" opacity="0.7"/>
+        </svg>
+        <span class="header-title">EchoShell</span>
+        <div id="live-pip" class="live-pip" style="display:none" title="Recording"></div>
+      </div>
       <div class="header-actions">
-        <button id="history-btn" class="icon-btn" title="History">📋</button>
-        <button id="export-btn" class="icon-btn" title="Export">⬇</button>
-        <button id="settings-btn" class="icon-btn" title="Settings">⚙</button>
-        <button id="clear-btn" class="icon-btn" title="Clear">🗑</button>
+        <button id="history-btn" class="action-btn" title="History">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>
+          </svg>
+        </button>
+        <button id="export-btn" class="action-btn" title="Export">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </button>
+        <button id="settings-btn" class="action-btn" title="Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button id="clear-btn" class="action-btn action-btn--danger" title="Clear">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+          </svg>
+        </button>
       </div>
     </header>
 
-    <!-- Main transcript view -->
+    <!-- Transcript view -->
     <div id="transcript-view" class="view active">
       <div id="transcript-list" class="transcript-list">
         <div class="empty-state">
-          <p>No transcript yet.</p>
-          <p class="hint">Click the extension icon to start capturing.</p>
+          <!-- Animated waveform SVG -->
+          <svg class="empty-wave" width="64" height="40" viewBox="0 0 64 40" fill="none">
+            <rect class="bar b1" x="2" y="12" width="6" height="16" rx="3" fill="#8b5cf6" opacity="0.3"/>
+            <rect class="bar b2" x="11" y="6" width="6" height="28" rx="3" fill="#8b5cf6" opacity="0.5"/>
+            <rect class="bar b3" x="20" y="10" width="6" height="20" rx="3" fill="#8b5cf6" opacity="0.7"/>
+            <rect class="bar b4" x="29" y="4" width="6" height="32" rx="3" fill="#8b5cf6"/>
+            <rect class="bar b5" x="38" y="10" width="6" height="20" rx="3" fill="#8b5cf6" opacity="0.7"/>
+            <rect class="bar b6" x="47" y="6" width="6" height="28" rx="3" fill="#8b5cf6" opacity="0.5"/>
+            <rect class="bar b7" x="56" y="12" width="6" height="16" rx="3" fill="#8b5cf6" opacity="0.3"/>
+          </svg>
+          <p class="empty-title">No transcript yet</p>
+          <p class="empty-hint">Open the popup and click Start Capture<br>to begin transcribing audio or screen.</p>
         </div>
       </div>
     </div>
 
     <!-- History view -->
     <div id="history-view" class="view">
-      <div class="view-header">
-        <button id="back-btn" class="back-btn">← Back</button>
-        <h2>History</h2>
+      <div class="subheader">
+        <button id="back-btn" class="back-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Back
+        </button>
+        <span class="subheader-title">History</span>
       </div>
       <div id="history-list" class="history-list"></div>
     </div>
 
     <!-- Export dialog -->
-    <div id="export-dialog" class="dialog" style="display:none;">
-      <div class="dialog-content">
-        <h3>Export Transcript</h3>
+    <div id="export-dialog" class="dialog-overlay" style="display:none">
+      <div class="dialog-box">
+        <h3 class="dialog-title">Export Transcript</h3>
         <div class="export-options">
-          <label><input type="radio" name="export-format" value="txt" checked> Plain Text (.txt)</label>
-          <label><input type="radio" name="export-format" value="md"> Markdown (.md)</label>
-          <label><input type="radio" name="export-format" value="srt"> Subtitle (.srt)</label>
+          <label class="export-option">
+            <input type="radio" name="export-format" value="txt" checked>
+            <span class="export-option-label">
+              <span class="export-fmt">.txt</span>
+              <span class="export-fmt-desc">Plain text</span>
+            </span>
+          </label>
+          <label class="export-option">
+            <input type="radio" name="export-format" value="md">
+            <span class="export-option-label">
+              <span class="export-fmt">.md</span>
+              <span class="export-fmt-desc">Markdown with timestamps</span>
+            </span>
+          </label>
+          <label class="export-option">
+            <input type="radio" name="export-format" value="srt">
+            <span class="export-option-label">
+              <span class="export-fmt">.srt</span>
+              <span class="export-fmt-desc">Subtitle file</span>
+            </span>
+          </label>
         </div>
         <div class="dialog-actions">
-          <button id="export-confirm-btn" class="btn btn-primary">Export</button>
-          <button id="export-cancel-btn" class="btn btn-ghost">Cancel</button>
+          <button id="export-cancel-btn" class="dialog-btn dialog-btn--ghost">Cancel</button>
+          <button id="export-confirm-btn" class="dialog-btn dialog-btn--primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export
+          </button>
         </div>
       </div>
     </div>

@@ -4,3 +4,4 @@ coverage/
 *.map
 .env
 .DS_Store
+.agent-worktrees/

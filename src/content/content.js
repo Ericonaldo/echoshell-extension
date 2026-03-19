@@ -44,31 +44,21 @@ function createSubtitleOverlay() {
 }
 
 /**
- * Position the overlay relative to the video player
+ * Position the overlay — now uses CSS fixed positioning, no-op
  */
 function positionOverlay() {
-  if (!subtitleOverlay) return;
-
-  const video = findVideoPlayer();
-  if (!video) return;
-
-  const rect = video.getBoundingClientRect();
-  const scrollX = window.scrollX || window.pageXOffset;
-  const scrollY = window.scrollY || window.pageYOffset;
-
-  subtitleOverlay.style.left = `${rect.left + scrollX + rect.width / 2}px`;
-  subtitleOverlay.style.top = `${rect.top + scrollY + rect.height - 80}px`;
-  subtitleOverlay.style.transform = 'translateX(-50%)';
+  // Overlay is position:fixed via CSS; no dynamic positioning needed
 }
 
 /**
  * Show subtitle text
  */
-function showSubtitle(text) {
+function showSubtitle(text, source) {
   if (!floatingEnabled) return;
 
   const overlay = createSubtitleOverlay();
   overlay.textContent = text;
+  overlay.setAttribute('data-source', source === 'ocr' ? 'OCR' : 'ASR');
   overlay.classList.add('visible');
   positionOverlay();
 
@@ -108,7 +98,7 @@ window.addEventListener('scroll', positionOverlay);
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case MSG.SHOW_SUBTITLE:
-      showSubtitle(message.text);
+      showSubtitle(message.text, message.source);
       sendResponse({ received: true });
       return false;
 

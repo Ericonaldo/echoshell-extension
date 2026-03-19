@@ -3,132 +3,235 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EchoShell Settings</title>
-  <link rel="stylesheet" href="settings.css">
+  <title>EchoShell — Settings</title>
 </head>
 <body>
-  <div class="settings-container">
-    <header class="settings-header">
-      <h1>EchoShell Settings</h1>
-      <p class="subtitle">Configure your API keys and preferences</p>
-    </header>
+  <div class="settings-root">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <rect width="24" height="24" rx="7" fill="url(#sg)"/>
+          <defs>
+            <linearGradient id="sg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#a78bfa"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </linearGradient>
+          </defs>
+          <rect x="4.5" y="9" width="2.5" height="6" rx="1.25" fill="white" opacity="0.9"/>
+          <rect x="9" y="6.5" width="2.5" height="11" rx="1.25" fill="white"/>
+          <rect x="13.5" y="8" width="2.5" height="8" rx="1.25" fill="white" opacity="0.9"/>
+          <rect x="18" y="10" width="2.5" height="4" rx="1.25" fill="white" opacity="0.7"/>
+        </svg>
+        <span class="brand-name">EchoShell</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-section="asr">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          </svg>
+          Audio ASR
+        </a>
+        <a class="nav-item" data-section="ocr">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          Screen OCR
+        </a>
+        <a class="nav-item" data-section="llm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          LLM Polish
+        </a>
+        <a class="nav-item" data-section="display">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          Display
+        </a>
+      </nav>
+    </aside>
 
-    <form id="settings-form">
-      <!-- ASR Settings -->
-      <section class="settings-section">
-        <h2>🎙 Audio Transcription (ASR)</h2>
-        <div class="form-group">
-          <label>Provider</label>
-          <select id="asr-provider" name="asr.provider">
-            <option value="openai">OpenAI Whisper</option>
-            <option value="deepgram">Deepgram</option>
-            <option value="groq">Groq</option>
-            <option value="custom">Custom Endpoint</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>API Key</label>
-          <div class="input-with-toggle">
-            <input type="password" id="asr-api-key" name="asr.apiKey" placeholder="sk-..." autocomplete="off">
-            <button type="button" class="toggle-visibility" data-target="asr-api-key">👁</button>
-          </div>
-        </div>
-        <div class="form-group" id="asr-endpoint-group">
-          <label>Endpoint URL</label>
-          <input type="url" id="asr-endpoint" name="asr.endpoint"
-            placeholder="https://api.openai.com/v1/audio/transcriptions">
-        </div>
-        <div class="form-group">
-          <label>Model</label>
-          <input type="text" id="asr-model" name="asr.model" placeholder="whisper-1">
-        </div>
-        <div class="form-group">
-          <label>Language (leave empty for auto)</label>
-          <input type="text" id="asr-language" name="asr.language" placeholder="en, zh, auto...">
-        </div>
-      </section>
+    <main class="settings-main">
+      <form id="settings-form" novalidate>
 
-      <!-- OCR Settings -->
-      <section class="settings-section">
-        <h2>👁 Screen OCR</h2>
-        <div class="form-group">
-          <label>Provider</label>
-          <select id="ocr-provider" name="ocr.provider">
-            <option value="openai">OpenAI Vision</option>
-            <option value="tesseract">Tesseract.js (Offline)</option>
-          </select>
-        </div>
-        <div class="form-group" id="ocr-api-key-group">
-          <label>API Key</label>
-          <div class="input-with-toggle">
-            <input type="password" id="ocr-api-key" name="ocr.apiKey" placeholder="sk-..." autocomplete="off">
-            <button type="button" class="toggle-visibility" data-target="ocr-api-key">👁</button>
+        <!-- ASR Section -->
+        <section id="section-asr" class="settings-section active-section">
+          <div class="section-header">
+            <h2 class="section-title">Audio Transcription</h2>
+            <p class="section-desc">Configure your ASR provider for real-time audio transcription.</p>
           </div>
-        </div>
-        <div class="form-group" id="ocr-endpoint-group">
-          <label>Endpoint URL</label>
-          <input type="url" id="ocr-endpoint" name="ocr.endpoint"
-            placeholder="https://api.openai.com/v1/chat/completions">
-        </div>
-        <div class="form-group">
-          <label>Model</label>
-          <input type="text" id="ocr-model" name="ocr.model" placeholder="gpt-4o-mini">
-        </div>
-      </section>
-
-      <!-- LLM Settings -->
-      <section class="settings-section">
-        <h2>✨ Text Polish (LLM)</h2>
-        <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="llm-enabled" name="llm.enabled">
-            Enable LLM text polish
-          </label>
-        </div>
-        <div id="llm-fields">
-          <div class="form-group">
-            <label>Provider</label>
-            <select id="llm-provider" name="llm.provider">
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-              <option value="custom">Custom Endpoint</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>API Key</label>
-            <div class="input-with-toggle">
-              <input type="password" id="llm-api-key" name="llm.apiKey" placeholder="sk-..." autocomplete="off">
-              <button type="button" class="toggle-visibility" data-target="llm-api-key">👁</button>
+          <div class="card">
+            <div class="field">
+              <label class="field-label">Provider</label>
+              <select id="asr-provider" class="select">
+                <option value="openai">OpenAI Whisper</option>
+                <option value="deepgram">Deepgram</option>
+                <option value="groq">Groq</option>
+                <option value="custom">Custom Endpoint</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">API Key</label>
+              <div class="key-input">
+                <input type="password" id="asr-api-key" class="input" placeholder="sk-…" autocomplete="off" spellcheck="false">
+                <button type="button" class="key-toggle" data-target="asr-api-key" aria-label="Toggle visibility">
+                  <svg class="eye-show" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="eye-hide" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Endpoint URL <span class="field-optional">optional</span></label>
+              <input type="url" id="asr-endpoint" class="input" placeholder="https://api.openai.com/v1/audio/transcriptions">
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">Model</label>
+                <input type="text" id="asr-model" class="input" placeholder="whisper-1">
+              </div>
+              <div class="field">
+                <label class="field-label">Language <span class="field-optional">auto</span></label>
+                <input type="text" id="asr-language" class="input" placeholder="en, zh, ja…">
+              </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Model</label>
-            <input type="text" id="llm-model" name="llm.model" placeholder="gpt-4o-mini">
+        </section>
+
+        <!-- OCR Section -->
+        <section id="section-ocr" class="settings-section">
+          <div class="section-header">
+            <h2 class="section-title">Screen OCR</h2>
+            <p class="section-desc">Extract subtitles from on-screen video using vision AI or local Tesseract.</p>
           </div>
-        </div>
-      </section>
+          <div class="card">
+            <div class="field">
+              <label class="field-label">Provider</label>
+              <select id="ocr-provider" class="select">
+                <option value="openai">OpenAI Vision (gpt-4o-mini)</option>
+                <option value="tesseract">Tesseract.js — Offline</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">API Key</label>
+              <div class="key-input">
+                <input type="password" id="ocr-api-key" class="input" placeholder="sk-…" autocomplete="off" spellcheck="false">
+                <button type="button" class="key-toggle" data-target="ocr-api-key" aria-label="Toggle visibility">
+                  <svg class="eye-show" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="eye-hide" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">Endpoint <span class="field-optional">optional</span></label>
+                <input type="url" id="ocr-endpoint" class="input" placeholder="https://api.openai.com/…">
+              </div>
+              <div class="field">
+                <label class="field-label">Model</label>
+                <input type="text" id="ocr-model" class="input" placeholder="gpt-4o-mini">
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <!-- UI Settings -->
-      <section class="settings-section">
-        <h2>🎨 Display</h2>
-        <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="floating-subtitles" name="ui.floatingSubtitles">
-            Show floating subtitles on video
-          </label>
-        </div>
-        <div class="form-group">
-          <label>Font Size</label>
-          <input type="range" id="font-size" name="ui.fontSize" min="12" max="32" step="1">
-          <span id="font-size-display">16px</span>
-        </div>
-      </section>
+        <!-- LLM Section -->
+        <section id="section-llm" class="settings-section">
+          <div class="section-header">
+            <h2 class="section-title">LLM Text Polish</h2>
+            <p class="section-desc">Optionally clean up raw transcript output using a language model.</p>
+          </div>
+          <div class="card">
+            <div class="field">
+              <div class="toggle-row">
+                <div>
+                  <div class="field-label" style="margin-bottom:2px">Enable text polish</div>
+                  <div class="field-desc">Pass transcript through LLM for punctuation and cleanup</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="llm-enabled">
+                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+              </div>
+            </div>
+            <div id="llm-fields" class="llm-fields">
+              <div class="field">
+                <label class="field-label">Provider</label>
+                <select id="llm-provider" class="select">
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Anthropic</option>
+                  <option value="custom">Custom Endpoint</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">API Key</label>
+                <div class="key-input">
+                  <input type="password" id="llm-api-key" class="input" placeholder="sk-…" autocomplete="off" spellcheck="false">
+                  <button type="button" class="key-toggle" data-target="llm-api-key" aria-label="Toggle visibility">
+                    <svg class="eye-show" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-hide" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Model</label>
+                <input type="text" id="llm-model" class="input" placeholder="gpt-4o-mini">
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save Settings</button>
-        <div id="save-status" class="save-status"></div>
-      </div>
-    </form>
+        <!-- Display Section -->
+        <section id="section-display" class="settings-section">
+          <div class="section-header">
+            <h2 class="section-title">Display</h2>
+            <p class="section-desc">Control how transcripts appear on-screen.</p>
+          </div>
+          <div class="card">
+            <div class="field">
+              <div class="toggle-row">
+                <div>
+                  <div class="field-label" style="margin-bottom:2px">Floating subtitles</div>
+                  <div class="field-desc">Show transcript overlay on video player</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="floating-subtitles">
+                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Subtitle font size</label>
+              <div class="range-row">
+                <input type="range" id="font-size" class="range" min="12" max="32" step="1" value="16">
+                <span id="font-size-display" class="range-value">16px</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="form-footer">
+          <div id="save-status" class="save-status"></div>
+          <button type="submit" class="save-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Save Settings
+          </button>
+        </div>
+      </form>
+    </main>
   </div>
   <script src="settings.js"></script>
 </body>
