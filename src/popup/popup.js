@@ -89,10 +89,13 @@ function setCapturingState(capturing) {
   startBtn.disabled = capturing;
   stopBtn.disabled = !capturing;
 
+  const statusBar = document.querySelector('.status-bar');
+
   if (capturing) {
     pip.className = 'status-pip active';
     statusText.textContent = 'Recording';
     timerEl.style.display = 'inline';
+    statusBar?.classList.add('recording');
     timerSeconds = 0;
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
@@ -105,6 +108,7 @@ function setCapturingState(capturing) {
     pip.className = 'status-pip inactive';
     statusText.textContent = 'Ready';
     timerEl.style.display = 'none';
+    statusBar?.classList.remove('recording');
     clearInterval(timerInterval);
   }
 }
