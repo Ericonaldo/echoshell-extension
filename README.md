@@ -2,6 +2,19 @@
 
 > BYOK (Bring Your Own Key) Chrome Extension for high-precision podcast and video transcription. Capture real-time audio (ASR) and on-screen subtitles (OCR) simultaneously.
 
+<!-- Screenshots -->
+<p align="center">
+  <img src="docs/screenshots/popup-idle.png" width="260" alt="Popup — idle state"/>
+  <img src="docs/screenshots/popup-native-found.png" width="260" alt="Popup — native subtitles detected"/>
+  <img src="docs/screenshots/sidepanel-transcript.png" width="300" alt="Side panel — live transcript with speaker labels"/>
+</p>
+<p align="center">
+  <img src="docs/screenshots/settings.png" width="600" alt="Settings page — BYOK configuration"/>
+</p>
+<p align="center">
+  <img src="docs/screenshots/overlay.png" width="600" alt="Floating subtitle overlay on YouTube"/>
+</p>
+
 ---
 
 ## Table of Contents
