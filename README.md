@@ -289,6 +289,45 @@ Output files in `dist/` are what gets loaded as the unpacked extension.
 
 ---
 
+## Test URLs
+
+Use these publicly available podcasts and talks to verify each capture mode.
+
+### Native Subtitle Extraction (no API key needed)
+
+| Site | URL | Why |
+|------|-----|-----|
+| **YouTube** | `https://www.youtube.com/watch?v=H14bBuluwB8` | Lex Fridman Podcast — auto-captions + manual EN |
+| **YouTube** | `https://www.youtube.com/watch?v=tLd9LWqnLfY` | Huberman Lab — multi-language captions |
+| **YouTube** | `https://www.youtube.com/watch?v=JN3KPFbWDog` | TED on YouTube — verified manual captions |
+| **TED.com** | `https://www.ted.com/talks/ken_robinson_says_schools_kill_creativity` | Classic TED, `<track>` WebVTT, 60+ languages |
+| **TED.com** | `https://www.ted.com/talks/brene_brown_the_power_of_vulnerability` | Multi-speaker segments, good diarization test |
+| **Bilibili** | `https://www.bilibili.com/video/BV1GJ411x7h7` | CN subtitles via `/x/player/v2` API |
+
+### Audio ASR (requires Groq or OpenAI key)
+
+| Site | URL | Why |
+|------|-----|-----|
+| **YouTube** | `https://www.youtube.com/watch?v=aircAruvnKk` | 3Blue1Brown — clear single speaker, good ASR baseline |
+| **NPR** | `https://www.npr.org/podcasts/510310/how-i-built-this` | HTML5 audio player, no native subs → ASR fallback |
+| **Spotify** | `https://open.spotify.com/episode/3ZDMrCJtSqVUPzTMFZHqbN` | No native subs → ASR fallback |
+
+### Screen OCR
+
+| Site | URL | Why |
+|------|-----|-----|
+| **YouTube** | Any video with CC enabled | Turn on YouTube's own CC, then use EchoShell OCR mode to capture them visually |
+| **Bilibili** | Any video with burn-in subs | Tests frame-diff + Tesseract on hardcoded Chinese subtitles |
+
+### Speaker Diarization
+
+| Test | How |
+|------|-----|
+| **Two-host podcast** | Use Deepgram ASR on any podcast with 2 speakers (e.g. Lex Fridman) — segments will be labeled Speaker A / Speaker B |
+| **Native with speaker labels** | Open `https://www.ted.com/talks/brene_brown_the_power_of_vulnerability` → native mode — `>> Speaker:` patterns parsed automatically |
+
+---
+
 ## Privacy & Security
 
 - **No telemetry**: EchoShell sends zero data to any EchoShell server. It only contacts the API providers you configure.
