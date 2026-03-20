@@ -4,15 +4,12 @@
 
 <!-- Screenshots -->
 <p align="center">
-  <img src="docs/screenshots/popup-idle.png" width="260" alt="Popup — idle state"/>
-  <img src="docs/screenshots/popup-native-found.png" width="260" alt="Popup — native subtitles detected"/>
-  <img src="docs/screenshots/sidepanel-transcript.png" width="300" alt="Side panel — live transcript with speaker labels"/>
+  <img src="docs/screenshots/popup-idle.png" width="240" alt="Popup — mode selection"/>
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/sidepanel-export.png" width="200" alt="Side panel — export dialog"/>
 </p>
 <p align="center">
-  <img src="docs/screenshots/settings.png" width="600" alt="Settings page — BYOK configuration"/>
-</p>
-<p align="center">
-  <img src="docs/screenshots/overlay.png" width="600" alt="Floating subtitle overlay on YouTube"/>
+  <em>Popup (mode selection) &nbsp;·&nbsp; Side panel export dialog</em>
 </p>
 
 ---
