@@ -277,13 +277,13 @@ async function startCapture() {
 async function stopCapture() {
   try {
     await chrome.runtime.sendMessage({ type: MSG.STOP_CAPTURE });
-    setCapturingState(false);
+    await setCapturingState(false);
   } catch (err) {
     showError(err.message);
   }
 }
 
-function setCapturingState(capturing) {
+async function setCapturingState(capturing) {
   isCapturing = capturing;
   const startBtn = document.getElementById('start-btn');
   const stopBtn = document.getElementById('stop-btn');
@@ -297,6 +297,11 @@ function setCapturingState(capturing) {
   stopBtn.disabled = !capturing;
 
   const statusBar = document.querySelector('.status-bar');
+
+  // Lock / unlock mode cards
+  const modeGrid = document.querySelector('.mode-grid');
+  document.querySelectorAll('input[name="mode"]').forEach(r => { r.disabled = capturing; });
+  modeGrid?.classList.toggle('mode-grid--locked', capturing);
 
   if (capturing) {
     pip.className = 'status-pip active';
@@ -317,6 +322,10 @@ function setCapturingState(capturing) {
     timerEl.style.display = 'none';
     statusBar?.classList.remove('recording');
     clearInterval(timerInterval);
+    // Re-check config warning for current mode after stopping
+    const settings = await getSettings();
+    const mode = document.querySelector('input[name="mode"]:checked')?.value || settings.captureMode;
+    await updateConfigWarning(mode, settings);
   }
 }
 
@@ -347,13 +356,16 @@ async function updateConfigWarning(mode, settings) {
   const warning = await checkModeConfigured(mode, settings);
   const warningEl = document.getElementById('config-warning');
   const warningText = document.getElementById('config-warning-text');
+  const startBtn = document.getElementById('start-btn');
   if (!warningEl || !warningText) return;
 
   if (warning) {
     warningText.textContent = warning;
     warningEl.style.display = 'flex';
+    if (startBtn) startBtn.disabled = true;
   } else {
     warningEl.style.display = 'none';
+    if (startBtn && !isCapturing) startBtn.disabled = false;
   }
 }
 
