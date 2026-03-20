@@ -33,6 +33,9 @@ function findVideoPlayer() {
  */
 function createSubtitleOverlay() {
   if (subtitleOverlay) return subtitleOverlay;
+  // Reuse existing DOM element in case of double-injection
+  const existing = document.getElementById('echoshell-subtitle-overlay');
+  if (existing) { subtitleOverlay = existing; return existing; }
 
   const overlay = document.createElement('div');
   overlay.id = 'echoshell-subtitle-overlay';

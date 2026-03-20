@@ -66,11 +66,35 @@ async function broadcastToContentScripts(message) {
 let activeSessionId = null;
 
 /**
+ * Ensure content script is running in a tab (inject if not already present)
+ */
+async function ensureContentScript(tabId) {
+  try {
+    // Ping the content script — if it responds, it's already running
+    await chrome.tabs.sendMessage(tabId, { type: 'PING' });
+  } catch (_) {
+    // Content script not present — inject it programmatically
+    try {
+      await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+      await chrome.scripting.insertCSS({ target: { tabId }, files: ['content.css'] });
+    } catch (_injErr) {
+      // Ignore injection failures (e.g. chrome:// pages)
+    }
+  }
+}
+
+/**
  * Handle START_CAPTURE message
  */
 async function handleStartCapture(request, sender) {
   try {
     const settings = await getSettings();
+
+    // Ensure content script is injected in the capture tab
+    const captureTabId = request.tabId || sender?.tab?.id;
+    if (captureTabId) {
+      await ensureContentScript(captureTabId);
+    }
 
     // Create a new session
     activeSessionId = generateId();
