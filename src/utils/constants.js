@@ -16,7 +16,9 @@ export const MSG = {
   CAPTURE_STATUS: 'CAPTURE_STATUS',
   DETECT_NATIVE_SUBTITLES: 'DETECT_NATIVE_SUBTITLES',
   NATIVE_SEGMENTS: 'NATIVE_SEGMENTS',
-  NATIVE_DETECT_RESULT: 'NATIVE_DETECT_RESULT'
+  NATIVE_DETECT_RESULT: 'NATIVE_DETECT_RESULT',
+  FORUM_CHECK: 'FORUM_CHECK',
+  FORUM_UPLOAD_RESULT: 'FORUM_UPLOAD_RESULT'
 };
 
 // ASR Providers
@@ -74,6 +76,11 @@ export const DEFAULT_SETTINGS = {
     floatingSubtitles: true,
     fontSize: 16,
     theme: 'dark'
+  },
+  forum: {
+    enabled: false,
+    url: '',
+    autoUpload: true
   }
 };
 

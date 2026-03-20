@@ -141,6 +141,19 @@ function showView(id) {
   document.getElementById(id)?.classList.add('active');
 }
 
+function showForumToast(forumUrl) {
+  const toast = document.getElementById('forum-toast');
+  const link = document.getElementById('forum-toast-link');
+  if (!toast || !link) return;
+  link.href = forumUrl;
+  toast.style.display = 'flex';
+  // Auto-dismiss after 8 seconds
+  setTimeout(() => { toast.style.display = 'none'; }, 8000);
+  document.getElementById('forum-toast-close')?.addEventListener('click', () => {
+    toast.style.display = 'none';
+  }, { once: true });
+}
+
 function init() {
   document.getElementById('history-btn').addEventListener('click', async () => {
     await loadHistory();
@@ -204,6 +217,11 @@ chrome.runtime.onMessage.addListener((message) => {
       break;
     case MSG.STOP_CAPTURE:
       if (pip) pip.style.display = 'none';
+      break;
+    case MSG.FORUM_UPLOAD_RESULT:
+      if (message.success && message.forumUrl) {
+        showForumToast(message.forumUrl);
+      }
       break;
     case MSG.NATIVE_SEGMENTS:
       // Load native subtitle segments in batch

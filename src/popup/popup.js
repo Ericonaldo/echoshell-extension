@@ -43,6 +43,13 @@ async function init() {
   // Event: "Start Transcript" button (idle view)
   document.getElementById('start-transcript-btn').addEventListener('click', onStartTranscript);
 
+  // Event: "View in Forum" link (forum-found view) — href set dynamically
+  // Event: "Transcribe anyway" (forum-found view)
+  document.getElementById('skip-forum-btn').addEventListener('click', () => {
+    showView('view-detecting');
+    runNativeSubtitleDetection();
+  });
+
   // Event: open side panel (idle view)
   document.getElementById('open-panel-idle-btn').addEventListener('click', openSidePanel);
 
@@ -85,15 +92,51 @@ async function init() {
 
 /**
  * "Start Transcript" clicked from idle view:
- * 1. Show detecting view
- * 2. Send DETECT_NATIVE_SUBTITLES to background SW
- * 3. If found -> show native view
- * 4. If not -> show AI view with notice
+ * 1. Check forum for existing transcript (if enabled)
+ * 2. If found -> show forum-found view with link
+ * 3. If not found -> show detecting view
+ * 4. Detect native subtitles -> show native or AI view
  */
 async function onStartTranscript() {
-  showView('view-detecting');
   clearError();
 
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) {
+      showError('No active tab found');
+      return;
+    }
+
+    // Step 1: Check forum for existing transcript
+    const forumResult = await chrome.runtime.sendMessage({
+      type: MSG.FORUM_CHECK,
+      url: tab.url
+    });
+
+    if (forumResult?.found && forumResult?.forumUrl) {
+      // Show forum-found view
+      const titleEl = document.getElementById('forum-episode-title');
+      if (titleEl) titleEl.textContent = forumResult.episodeTitle || 'Episode';
+      const openBtn = document.getElementById('open-forum-btn');
+      if (openBtn) openBtn.href = forumResult.forumUrl;
+      showView('view-forum-found');
+      return;
+    }
+
+    // Step 2: Proceed to native subtitle detection
+    showView('view-detecting');
+    await runNativeSubtitleDetection();
+  } catch (err) {
+    showView('view-detecting');
+    await runNativeSubtitleDetection();
+  }
+}
+
+/**
+ * Detect native subtitles and show appropriate view
+ */
+async function runNativeSubtitleDetection() {
+  clearError();
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab) {
@@ -108,11 +151,9 @@ async function onStartTranscript() {
     });
 
     if (response?.found && response?.tracks?.length > 0) {
-      // Native subtitles found
       nativeTrackInfo = response;
       showNativeView(response);
     } else {
-      // No native subtitles, go to AI view
       nativeTrackInfo = null;
       showView('view-ai');
       document.getElementById('no-native-notice').style.display = 'flex';

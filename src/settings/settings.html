@@ -61,6 +61,12 @@
           </svg>
           Display
         </a>
+        <a class="nav-item" data-section="forum">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Forum
+        </a>
       </nav>
     </aside>
 
@@ -217,6 +223,47 @@
               <div class="range-row">
                 <input type="range" id="font-size" class="range" min="12" max="32" step="1" value="16">
                 <span id="font-size-display" class="range-value">16px</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Forum Integration Section -->
+        <section id="section-forum" class="settings-section">
+          <div class="section-header">
+            <h2 class="section-title">Forum Integration</h2>
+            <p class="section-desc">Connect to the EchoShell podcast transcript forum to share and discover transcripts. Transcripts are uploaded anonymously — no account needed.</p>
+          </div>
+          <div class="card">
+            <div class="field">
+              <div class="toggle-row">
+                <div>
+                  <div class="field-label" style="margin-bottom:2px">Enable forum integration</div>
+                  <div class="field-desc">Check forum before transcribing; auto-upload completed transcripts</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="forum-enabled">
+                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </label>
+              </div>
+            </div>
+            <div id="forum-fields" class="llm-fields">
+              <div class="field">
+                <label class="field-label">Forum URL</label>
+                <input type="url" id="forum-url" class="input" placeholder="http://your-server:4010">
+                <div class="field-desc" style="margin-top:4px;font-size:11px;opacity:0.6">The base URL of the EchoShell transcript forum server</div>
+              </div>
+              <div class="field">
+                <div class="toggle-row">
+                  <div>
+                    <div class="field-label" style="margin-bottom:2px">Auto-upload after transcription</div>
+                    <div class="field-desc">Automatically share completed transcripts to the forum</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="forum-auto-upload">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>

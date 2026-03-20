@@ -29,6 +29,11 @@ function populateForm(settings) {
   setChecked('floating-subtitles', settings.ui.floatingSubtitles);
   setVal('font-size', settings.ui.fontSize);
   updateFontSizeDisplay(settings.ui.fontSize);
+
+  setChecked('forum-enabled', settings.forum.enabled);
+  setVal('forum-url', settings.forum.url);
+  setChecked('forum-auto-upload', settings.forum.autoUpload);
+  toggleForumFields(settings.forum.enabled);
 }
 
 function bindEvents() {
@@ -65,11 +70,28 @@ function bindEvents() {
     toggleLlmFields(e.target.checked);
   });
 
+  // Forum toggle
+  document.getElementById('forum-enabled').addEventListener('change', e => {
+    toggleForumFields(e.target.checked);
+  });
+
   // Form submit
   document.getElementById('settings-form').addEventListener('submit', async e => {
     e.preventDefault();
     await saveSettings();
   });
+}
+
+function toggleForumFields(enabled) {
+  const fields = document.getElementById('forum-fields');
+  if (!fields) return;
+  if (enabled) {
+    fields.classList.add('expanded');
+    fields.querySelectorAll('input, select').forEach(el => el.removeAttribute('disabled'));
+  } else {
+    fields.classList.remove('expanded');
+    fields.querySelectorAll('input, select').forEach(el => el.setAttribute('disabled', ''));
+  }
 }
 
 function toggleLlmFields(enabled) {
@@ -119,6 +141,11 @@ async function saveSettings() {
         floatingSubtitles: getChecked('floating-subtitles'),
         fontSize: parseInt(getVal('font-size'), 10) || 16,
         theme: 'dark'
+      },
+      forum: {
+        enabled: getChecked('forum-enabled'),
+        url: getVal('forum-url').replace(/\/$/, ''),
+        autoUpload: getChecked('forum-auto-upload')
       }
     };
 

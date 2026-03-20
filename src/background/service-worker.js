@@ -1,6 +1,7 @@
 import { MSG, STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants.js';
-import { getSettings, saveSession, generateId } from '../utils/storage.js';
+import { getSettings, saveSession, generateId, getHistory } from '../utils/storage.js';
 import { detectInMainWorld, fetchSubtitleContent } from '../utils/native-subtitle-extractor.js';
+import { checkForumTranscript, uploadToForum, buildForumEpisodeUrl } from '../utils/forum-client.js';
 
 // Track if capture is in progress (using storage.session for persistence across SW restarts)
 let creatingOffscreen = false;
@@ -112,17 +113,65 @@ async function handleStartCapture(request, sender) {
 }
 
 /**
- * Handle STOP_CAPTURE message
+ * Handle STOP_CAPTURE message — also triggers forum auto-upload if enabled
  */
 async function handleStopCapture() {
+  const sessionId = activeSessionId;
   try {
     await chrome.runtime.sendMessage({ type: MSG.STOP_AUDIO });
     await closeOffscreen();
     await chrome.storage.session.set({ captureActive: false });
     activeSessionId = null;
+
+    // Auto-upload to forum if enabled
+    if (sessionId) {
+      const settings = await getSettings();
+      if (settings.forum?.enabled && settings.forum?.autoUpload && settings.forum?.url) {
+        // Retrieve saved session from history
+        const history = await getHistory(100);
+        const session = history.find(s => s.id === sessionId);
+        if (session && session.segments && session.segments.length > 0) {
+          const result = await uploadToForum(session, settings.forum.url);
+          if (result?.success) {
+            const forumUrl = buildForumEpisodeUrl(settings.forum.url, result.episodeId);
+            await sendToSidePanel({
+              type: MSG.FORUM_UPLOAD_RESULT,
+              success: true,
+              episodeId: result.episodeId,
+              forumUrl
+            });
+          }
+        }
+      }
+    }
+
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Handle FORUM_CHECK message — check forum for existing transcript
+ */
+async function handleForumCheck(request) {
+  try {
+    const settings = await getSettings();
+    if (!settings.forum?.enabled || !settings.forum?.url) {
+      return { found: false };
+    }
+    const result = await checkForumTranscript(request.url, settings.forum.url);
+    if (!result || !result.found) return { found: false };
+    return {
+      found: true,
+      episodeId: result.episodeId,
+      podcastId: result.podcastId,
+      episodeTitle: result.episodeTitle,
+      podcastName: result.podcastName,
+      forumUrl: buildForumEpisodeUrl(settings.forum.url, result.episodeId)
+    };
+  } catch (err) {
+    return { found: false, error: err.message };
   }
 }
 
@@ -229,6 +278,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case MSG.DETECT_NATIVE_SUBTITLES:
       handleDetectNativeSubtitles(message, sender).then(sendResponse);
+      return true;
+
+    case MSG.FORUM_CHECK:
+      handleForumCheck(message).then(sendResponse);
       return true;
 
     default:
