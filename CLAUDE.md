@@ -2,11 +2,13 @@
 
 一个podcast transcript，以chrome浏览器插件的形式，能利用几种功能实现播客文字稿的转译：1. 通过monitor屏幕，把视频中的字幕转成文字稿 2. 通过音频转译。用户可以选择转译的方式。如果需要配置什么模型或者服务的API，也显示在web或者工具页面中让用户可以配置自己的服务key
 
-你需要完成产品的设计、技术选择、实现
+你需要完成产品的界面优化，功能测试
 **注意**：需要设计多种测试用例，并在实现后保证工具完全通过测试。
 
 git 仓库：git@github.com:Ericonaldo/echoshell-extension.git
 echoshell-extension: A BYOK-based Chrome Extension for high-precision podcast transcription. Capture real-time audio (ASR) and on-screen subtitles (OCR) simultaneously. Supports OpenAI Whisper, Deepgram, and custom endpoints.
+
+already installed in chrome://extensions/?id=mbifkmmjeijejofaljclklepkahimldc
 
 ---
 
@@ -50,7 +52,7 @@ Keep working until **all functions are confirmed working**.
 
 ### 2.1 双重捕获引擎 (Dual-Capture Engine)
 1.  **音频转译模式 (Audio-to-Text)**
-    * **原理**: 调用 `chrome.offscreen` API 捕获当前标签页音频流（Tab Capture）。
+    * **原理**: 调用 `chrome.offscreen` API 捕获当前标签页频流（Tab Capture）。
     * **处理**: 将音频流进行 PCM 编码处理，并按设定的时间间隔（如 10s）或静音检测（VAD）进行切片。
     * **分发**: 发送至用户配置的 ASR API（如 OpenAI Whisper）。
 2.  **视觉 OCR 模式 (Screen-to-Text)**
@@ -341,3 +343,4 @@ Include:
 And remember:
 
 > **After every new feature, update the README and documentation.**
+

@@ -3,6 +3,8 @@
  * Communicates with the EchoShell podcast transcript forum API.
  */
 
+import { fullPolishText } from './llm-client.js';
+
 function msToTimestamp(ms) {
   const total = Math.floor(ms / 1000);
   const m = Math.floor(total / 60);
@@ -47,19 +49,34 @@ export async function checkForumTranscript(tabUrl, forumUrl) {
 
 /**
  * Upload a completed session (segments) to the forum anonymously.
+ * If LLM config is provided, post-processes transcript with punctuation + speaker diarization.
  * @param {Object} session - { id, title, url, createdAt, segments: [{ timestamp, text, source }] }
  * @param {string} forumUrl - The forum base URL
  * @param {string} [language] - Transcript language code
+ * @param {Object} [llmConfig] - LLM configuration for post-processing { enabled, provider, apiKey, endpoint, model }
  * @returns {Promise<{success: boolean, episodeId?: number, podcastId?: number}|null>}
  */
-export async function uploadToForum(session, forumUrl, language = 'zh') {
+export async function uploadToForum(session, forumUrl, language = 'zh', llmConfig = null) {
   if (!forumUrl || !session || !session.segments || session.segments.length === 0) return null;
 
   try {
     // Build plain-text transcript with timestamps
-    const content = session.segments
-      .map(seg => `[${msToTimestamp(seg.timestamp)}] ${seg.text}`)
+    let content = session.segments
+      .map(seg => {
+        const ts = msToTimestamp(seg.timestamp);
+        const speaker = seg.speakerLabel ? `**[${seg.speakerLabel}]** ` : '';
+        return `[${ts}] ${speaker}${seg.text}`;
+      })
       .join('\n');
+
+    // LLM post-processing: add punctuation + speaker diarization
+    if (llmConfig && llmConfig.enabled && llmConfig.apiKey) {
+      try {
+        content = await fullPolishText(content, llmConfig);
+      } catch (e) {
+        console.warn('[EchoShell] LLM polish failed, uploading raw transcript:', e.message);
+      }
+    }
 
     const podcastName = extractSourceName(session.url);
     const publishedDate = session.createdAt

@@ -155,7 +155,9 @@ async function handleStopCapture() {
         const history = await getHistory(100);
         const session = history.find(s => s.id === sessionId);
         if (session && session.segments && session.segments.length > 0) {
-          const result = await uploadToForum(session, settings.forum.url);
+          // Pass LLM config for post-processing (punctuation + speaker diarization)
+          const llmConfig = settings.llm?.enabled ? settings.llm : null;
+          const result = await uploadToForum(session, settings.forum.url, settings.forum.language || 'zh', llmConfig);
           if (result?.success) {
             const forumUrl = buildForumEpisodeUrl(settings.forum.url, result.episodeId);
             await sendToSidePanel({
