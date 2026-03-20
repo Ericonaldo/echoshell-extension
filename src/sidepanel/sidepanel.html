@@ -89,6 +89,39 @@
       <div id="history-list" class="history-list"></div>
     </div>
 
+    <!-- Forum upload confirmation dialog -->
+    <div id="forum-upload-dialog" class="dialog-overlay" style="display:none">
+      <div class="dialog-box">
+        <h3 class="dialog-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-light)">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          上传到论坛
+        </h3>
+        <p id="forum-upload-meta" class="dialog-meta"></p>
+        <p id="forum-upload-llm-note" class="dialog-llm-note" style="display:none">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          将使用 LLM 自动添加标点和说话人标注
+        </p>
+        <!-- Progress bar (shown during LLM processing) -->
+        <div id="forum-upload-progress-wrap" style="display:none">
+          <div class="forum-progress-bar">
+            <div id="forum-progress-fill" class="forum-progress-fill"></div>
+          </div>
+          <p id="forum-progress-label" class="forum-progress-label">处理中…</p>
+        </div>
+        <div id="forum-upload-actions" class="dialog-actions">
+          <button id="forum-upload-cancel-btn" class="dialog-btn dialog-btn--ghost">稍后再说</button>
+          <button id="forum-upload-confirm-btn" class="dialog-btn dialog-btn--primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            上传
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Forum upload toast -->
     <div id="forum-toast" class="forum-toast" style="display:none">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

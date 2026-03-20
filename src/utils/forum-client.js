@@ -56,7 +56,7 @@ export async function checkForumTranscript(tabUrl, forumUrl) {
  * @param {Object} [llmConfig] - LLM configuration for post-processing { enabled, provider, apiKey, endpoint, model }
  * @returns {Promise<{success: boolean, episodeId?: number, podcastId?: number}|null>}
  */
-export async function uploadToForum(session, forumUrl, language = 'zh', llmConfig = null) {
+export async function uploadToForum(session, forumUrl, language = 'zh', llmConfig = null, onProgress = null) {
   if (!forumUrl || !session || !session.segments || session.segments.length === 0) return null;
 
   try {
@@ -72,7 +72,7 @@ export async function uploadToForum(session, forumUrl, language = 'zh', llmConfi
     // LLM post-processing: add punctuation + speaker diarization
     if (llmConfig && llmConfig.enabled && llmConfig.apiKey) {
       try {
-        content = await fullPolishText(content, llmConfig);
+        content = await fullPolishText(content, llmConfig, onProgress);
       } catch (e) {
         console.warn('[EchoShell] LLM polish failed, uploading raw transcript:', e.message);
       }

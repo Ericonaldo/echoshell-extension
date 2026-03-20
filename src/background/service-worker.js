@@ -137,7 +137,7 @@ async function handleStartCapture(request, sender) {
 }
 
 /**
- * Handle STOP_CAPTURE message — also triggers forum auto-upload if enabled
+ * Handle STOP_CAPTURE message — prompts user to upload if forum is enabled
  */
 async function handleStopCapture() {
   const sessionId = activeSessionId;
@@ -147,31 +147,73 @@ async function handleStopCapture() {
     await chrome.storage.session.set({ captureActive: false });
     activeSessionId = null;
 
-    // Auto-upload to forum if enabled
+    // Prompt user to review and upload if forum is enabled
     if (sessionId) {
       const settings = await getSettings();
-      if (settings.forum?.enabled && settings.forum?.autoUpload && settings.forum?.url) {
-        // Retrieve saved session from history
+      if (settings.forum?.enabled && settings.forum?.url) {
         const history = await getHistory(100);
         const session = history.find(s => s.id === sessionId);
         if (session && session.segments && session.segments.length > 0) {
-          // Pass LLM config for post-processing (punctuation + speaker diarization)
-          const llmConfig = settings.llm?.enabled ? settings.llm : null;
-          const result = await uploadToForum(session, settings.forum.url, settings.forum.language || 'zh', llmConfig);
-          if (result?.success) {
-            const forumUrl = buildForumEpisodeUrl(settings.forum.url, result.episodeId);
-            await sendToSidePanel({
-              type: MSG.FORUM_UPLOAD_RESULT,
-              success: true,
-              episodeId: result.episodeId,
-              forumUrl
-            });
-          }
+          const hasLlm = !!(settings.llm?.enabled && settings.llm?.apiKey);
+          await sendToSidePanel({
+            type: MSG.FORUM_UPLOAD_PROMPT,
+            sessionId,
+            segmentCount: session.segments.length,
+            title: session.title || 'Untitled',
+            hasLlm
+          });
         }
       }
     }
 
     return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Handle FORUM_UPLOAD_CONFIRM — user approved upload from side panel
+ */
+async function handleForumUploadConfirm(request) {
+  try {
+    const { sessionId } = request;
+    const settings = await getSettings();
+    const history = await getHistory(100);
+    const session = history.find(s => s.id === sessionId);
+
+    if (!session || !session.segments || session.segments.length === 0) {
+      return { success: false, error: 'Session not found' };
+    }
+
+    const llmConfig = settings.llm?.enabled && settings.llm?.apiKey ? settings.llm : null;
+    const totalChunks = llmConfig
+      ? Math.ceil(session.segments.map(s => s.text).join(' ').length / 2000)
+      : 0;
+
+    const onProgress = totalChunks > 1
+      ? (progress) => sendToSidePanel({ type: MSG.FORUM_UPLOAD_PROGRESS, progress })
+      : null;
+
+    const result = await uploadToForum(
+      session,
+      settings.forum.url,
+      settings.forum.language || 'zh',
+      llmConfig,
+      onProgress
+    );
+
+    if (result?.success) {
+      const forumUrl = buildForumEpisodeUrl(settings.forum.url, result.episodeId);
+      await sendToSidePanel({
+        type: MSG.FORUM_UPLOAD_RESULT,
+        success: true,
+        episodeId: result.episodeId,
+        forumUrl
+      });
+      return { success: true };
+    }
+    return { success: false, error: 'Upload failed' };
   } catch (err) {
     return { success: false, error: err.message };
   }
@@ -308,6 +350,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case MSG.FORUM_CHECK:
       handleForumCheck(message).then(sendResponse);
+      return true;
+
+    case MSG.FORUM_UPLOAD_CONFIRM:
+      handleForumUploadConfirm(message).then(sendResponse);
       return true;
 
     default:

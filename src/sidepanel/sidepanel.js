@@ -154,6 +154,42 @@ function showForumToast(forumUrl) {
   }, { once: true });
 }
 
+/**
+ * Show the "Upload to forum?" confirmation dialog
+ */
+function showForumUploadDialog(sessionId, segmentCount, title, hasLlm) {
+  const dialog = document.getElementById('forum-upload-dialog');
+  const meta = document.getElementById('forum-upload-meta');
+  const llmNote = document.getElementById('forum-upload-llm-note');
+  const progressWrap = document.getElementById('forum-upload-progress-wrap');
+  const actions = document.getElementById('forum-upload-actions');
+  if (!dialog) return;
+
+  if (meta) meta.textContent = `《${title}》· ${segmentCount} 段文字`;
+  if (llmNote) llmNote.style.display = hasLlm ? 'flex' : 'none';
+  if (progressWrap) progressWrap.style.display = 'none';
+  if (actions) actions.style.display = 'flex';
+
+  dialog.style.display = 'flex';
+  dialog._sessionId = sessionId;
+}
+
+function hideForumUploadDialog() {
+  const dialog = document.getElementById('forum-upload-dialog');
+  if (dialog) dialog.style.display = 'none';
+}
+
+function setForumUploadProgress(progress) {
+  const progressWrap = document.getElementById('forum-upload-progress-wrap');
+  const fill = document.getElementById('forum-progress-fill');
+  const label = document.getElementById('forum-progress-label');
+  const actions = document.getElementById('forum-upload-actions');
+  if (progressWrap) progressWrap.style.display = 'block';
+  if (actions) actions.style.display = 'none';
+  if (fill) fill.style.width = `${Math.round(progress * 100)}%`;
+  if (label) label.textContent = `LLM 处理中… ${Math.round(progress * 100)}%`;
+}
+
 function init() {
   document.getElementById('history-btn').addEventListener('click', async () => {
     await loadHistory();
@@ -179,6 +215,20 @@ function init() {
 
   document.getElementById('settings-btn').addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
+  });
+
+  document.getElementById('forum-upload-cancel-btn')?.addEventListener('click', hideForumUploadDialog);
+
+  document.getElementById('forum-upload-confirm-btn')?.addEventListener('click', async () => {
+    const dialog = document.getElementById('forum-upload-dialog');
+    const sessionId = dialog?._sessionId;
+    if (!sessionId) return;
+    setForumUploadProgress(0);
+    try {
+      await chrome.runtime.sendMessage({ type: 'FORUM_UPLOAD_CONFIRM', sessionId });
+    } catch (_) {
+      hideForumUploadDialog();
+    }
   });
 
   document.getElementById('clear-btn').addEventListener('click', async () => {
@@ -218,7 +268,21 @@ chrome.runtime.onMessage.addListener((message) => {
     case MSG.STOP_CAPTURE:
       if (pip) pip.style.display = 'none';
       break;
+    case MSG.FORUM_UPLOAD_PROMPT:
+      showForumUploadDialog(
+        message.sessionId,
+        message.segmentCount,
+        message.title,
+        message.hasLlm
+      );
+      break;
+
+    case MSG.FORUM_UPLOAD_PROGRESS:
+      setForumUploadProgress(message.progress);
+      break;
+
     case MSG.FORUM_UPLOAD_RESULT:
+      hideForumUploadDialog();
       if (message.success && message.forumUrl) {
         showForumToast(message.forumUrl);
       }
