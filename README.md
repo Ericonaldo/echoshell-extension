@@ -1,5 +1,8 @@
 # EchoShell - Chrome Extension
 
+[![GitHub](https://img.shields.io/badge/GitHub-Ericonaldo%2Fechoshell--extension-181717?logo=github)](https://github.com/Ericonaldo/echoshell-extension)
+[![License: MIT](https://img.shields.io/badge/License-MIT-7c3aed.svg)](#license)
+
 > BYOK (Bring Your Own Key) Chrome Extension for high-precision podcast and video transcription. Capture real-time audio (ASR) and on-screen subtitles (OCR) simultaneously.
 
 <!-- Screenshots -->
@@ -58,7 +61,7 @@
 
 The fastest way to get started at zero cost:
 
-1. **Install** the extension (see [Installation](#installation))
+1. **Install** the extension — clone [echoshell-extension](https://github.com/Ericonaldo/echoshell-extension) and follow [Installation](#installation)
 2. Get a free [Groq API key](https://console.groq.com) — takes 30 seconds
 3. Open **Settings** (⚙) → ASR → set Provider to **Groq**, paste your key, set model to `whisper-large-v3-turbo`
 4. For OCR, set Provider to **Tesseract.js** — no key needed, works offline
@@ -72,8 +75,14 @@ The fastest way to get started at zero cost:
 
 ### From Source
 
+**Repository:** [github.com/Ericonaldo/echoshell-extension](https://github.com/Ericonaldo/echoshell-extension)
+
 ```bash
+# HTTPS
+git clone https://github.com/Ericonaldo/echoshell-extension.git
+# or SSH
 git clone git@github.com:Ericonaldo/echoshell-extension.git
+
 cd echoshell-extension
 npm install
 npm run build
